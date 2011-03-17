@@ -101,7 +101,8 @@ class vk_wallpost
       preg_match_all('/{"user_id":(\d+),"photo_id":(\d+)}/i', $r, $out);
       return $f = array(
                   'user_id'  => $out[1][0],
-                  'photo_id' => $out[2][0]);
+                  'photo_id' => $out[2][0],
+                  'mixed_id' => $out[1][0].'_'.$out[2][0]);
     }
     else
     {
@@ -109,7 +110,7 @@ class vk_wallpost
     }
   }
   
-  function _status($page = false, $cookies, $hash, $url, $message, $title, $descr, $id, $type, $use_proxy = false) 
+  function _status($page = false, $cookies, $hash, $url, $message, $title, $descr, $photo, $id, $type, $use_proxy = false) 
   {
     $u = urlencode($url);
     $m = urlencode($message);
@@ -119,10 +120,18 @@ class vk_wallpost
       $_prefix = 'public';
     else
       $_prefix = 'id';
-      
+
     if( $type == 'share') 
     {
-      $q = 'act=post&al=1&hash='.$hash.'&message='.$m.'&note_title=&official=&status_export=&to_id='.$id.'&type=all&media_type=share&url='.$u.'&title='.$t.'&description='.$d;
+      $q = 'act=post&al=1&hash='.$hash.'&message='.$m.'&note_title=&official=&status_export=&to_id='.
+           $id.'&type=all&media_type=share&url='.$u.'&title='.$t.'&description='.$d;
+      if($photo)
+        $q .= '&media='.$photo;
+    } 
+    elseif( $type == 'photo') 
+    {
+      $q = 'act=post&al=1&hash='.$hash.'&message='.$m.'&note_title=&official=&status_export=&to_id='.
+           $id.'&type=all&media_type=photo&media='.$photo;
     } 
     elseif( $type == '') 
     {
