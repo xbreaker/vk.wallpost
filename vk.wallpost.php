@@ -1,4 +1,12 @@
 <?php 
+/**
+* vk.wallpost main class code
+*
+* @package vk.wallpost
+* @author Ayrat Belyaev <xbreaker@gmail.com>
+* @copyright (c) 2011 xbreaker
+* @license http://creativecommons.org/licenses/by-sa/3.0/legalcode
+*/
 
 class vk_wallpost 
 {
