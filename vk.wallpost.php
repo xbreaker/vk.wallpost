@@ -5,14 +5,14 @@ class vk_wallpost
  
   function _login() 
   {
-    return $a = array( 'l' => 'логин',
-                       'p' => 'пароль');
+    return $a = array( 'l' => 'login',
+                       'p' => 'password');
   }
   
   function _proxy() 
   {
-    return $p = array( 'a' => 'прокси:порт',
-                       'p' => 'логин:пароль',
+    return $p = array( 'a' => 'url:port',
+                       'p' => 'login:password',
                        's' => 'https');
   } 
   
