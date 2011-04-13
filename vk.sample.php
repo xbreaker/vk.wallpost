@@ -10,37 +10,14 @@
 if ( !class_exists( 'vk_wallpost' ) )
 		require('vk.wallpost.php' );
   
-function vkPost($url='http://mysite.ru/', $message='message', $title='title', $descr='descr', $type='share')  
-{     
-  $vkfu = new vk_wallpost();
-  $d = $vkfu->_login();
-  $o = 'desff65fdscx.txt'; //cookies
-  if(($d['l'] != '')&&($d['p'] != '')) {
-	$h = $vkfu->_hash($o, 'http://vkontakte.ru/mypage', true);
-		
-	if($h['my_id'] == 0) 
-	{
-	  $vkfu->_auth($o, $d, true);
-	  $h = $vkfu->_hash($o, 'http://vkontakte.ru/mypage', true);
-	} 
-
-	if($h['my_id'] != 0) 
-	{
-	  $r = $vkfu->_status(false, $o, $h['post_hash'], $url, $message, $title, $descr, false, $h['user_id'], $type, true);
-	  $c = preg_match_all('/page_wall_count_all/smi',$r,$f);
-	  if( $c == 0 ) 
-	  {
-	    return false;
-	  } 
-	  else 
-	  {
-	    return true;
-	  }
-	}
-  } 
-  else 
-  {
-    return false;
-  }
-}
+$vk = new vk_wallpost("login", "pass", "http://vkontakte.ru/club9999", "-9999");
+/////////////////////////////////////////^ адрес стены (юзера или группы) ^ id стены группы с минусом, пользователя- без него
+//настройка прокси
+$vk->proxyAddr="server:port";
+$vk->proxyAuth="user:pass";
+$vk->useProxy=false;
+//отправка сообщения
+$vk->postMessage("habr.ru", "Test message");
+//прикрепление изображения
+$vk->postPicture("habr.ru", "http://some.cool.image.jpg");
 ?>
