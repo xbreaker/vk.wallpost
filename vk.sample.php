@@ -13,7 +13,7 @@ if ( !class_exists( 'vk_wallpost' ) )
 function vkPost($url='http://mysite.ru/', $message='message', $title='title', $descr='descr', $type='share')  
 {     
   $vkfu = new vk_wallpost();
-  $d = $vkfu->_auth();
+  $d = $vkfu->_login();
   $o = 'desff65fdscx.txt'; //cookies
   if(($d['l'] != '')&&($d['p'] != '')) {
 	$h = $vkfu->_hash($o, 'http://vkontakte.ru/mypage', true);
