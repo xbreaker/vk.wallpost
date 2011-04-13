@@ -121,6 +121,21 @@ class vk_wallpost
     }
   }
   
+  /**
+  * Функция публикации статуса
+  * Параметры:
+  *            $page      - публикация на официальую страницу
+  *            $cookies   - файл с файлом cookies для авторизации
+  *            $hash      - значение параметра post_hash с исходной страницы
+  *            $url       - публикуемая ссылка
+  *            $message   - сообщение, выводимое на стенке
+  *            $title     - название ссылки, выводимое в всплывающей подсказке
+  *            $descr     - описание ссылки, выводимое в всплывающей подсказке
+  *            $photo     - значение уникального photo_id, которое получается с помощью функции photo
+  *            $id        - id стенки, куда публикуем сообщение
+  *            $type      - тип сообщения, share - ссылка, photo - фото, если пустое значение, то простое сообщение
+  *            $use_proxy - использование прокси
+  */
   function _status($page = false, $cookies, $hash, $url, $message, $title, $descr, $photo, $id, $type, $use_proxy = false) 
   {
     $u = urlencode($url);
@@ -128,10 +143,14 @@ class vk_wallpost
     $t = urlencode($title);
     $d = urlencode($descr);
     if($page)
+    {
       $_prefix = 'public';
+      $id = '-'.$id;
+    }
     else
+    {
       $_prefix = 'id';
-
+    }
     if( $type == 'share') 
     {
       $q = 'act=post&al=1&hash='.$hash.'&message='.$m.'&note_title=&official=&status_export=&to_id='.
