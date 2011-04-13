@@ -26,18 +26,21 @@ class vk_wallpost
   
   function _curl_init($use_proxy = false, $headers = false, $cookies)
   {
-    $c = curl_init($use_proxy); 
-    $proxy = $this->_proxy();
-    curl_setopt($c, CURLOPT_PROXY, $proxy['a']);
-    curl_setopt($c, CURLOPT_PROXYUSERPWD, $proxy['p']);
-    if( $proxy['s'] == 'socks4' ) 
+    $c = curl_init(); 
+    if($use_proxy)
     {
-      curl_setopt($c, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
-    } 
-    elseif( $proxy['s'] == 'socks5' ) 
-    {
-      curl_setopt($c, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-    } 
+      $proxy = $this->_proxy();
+      curl_setopt($c, CURLOPT_PROXY, $proxy['a']);
+      curl_setopt($c, CURLOPT_PROXYUSERPWD, $proxy['p']);
+      if( $proxy['s'] == 'socks4' ) 
+      {
+        curl_setopt($c, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+      } 
+      elseif( $proxy['s'] == 'socks5' ) 
+      {
+        curl_setopt($c, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+      } 
+    }  
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1); 
     curl_setopt($c, CURLOPT_FOLLOWLOCATION, 1); 
     curl_setopt($c, CURLOPT_POST, 1);  
@@ -70,7 +73,7 @@ class vk_wallpost
     $p = urlencode($data['p']);
     
     $s = 'act=login&q=1&al_frame=1&expire=&captcha_sid=&captcha_key=&from_host=vkontakte.ru&email='.$e.'&pass='.$p;
-    $this->_curl_init($use_proxy, false, $cookies);
+    $c = $this->_curl_init($use_proxy, false, $cookies);
     curl_setopt($c, CURLOPT_URL,'http://login.vk.com/?act=login'); 
     curl_setopt($c, CURLOPT_POSTFIELDS, $s);
     $this->_curl_do($c, '_auth');
@@ -78,7 +81,7 @@ class vk_wallpost
   
   function _hash($cookies, $url, $use_proxy = false) 
   {
-    $this->_curl_init($use_proxy, false, $cookies);
+    $c = $this->_curl_init($use_proxy, false, $cookies);
     curl_setopt($c, CURLOPT_REFERER, 'http://vkontakte.ru/settings.php');
     curl_setopt($c, CURLOPT_COOKIEFILE, $cookies); 
     curl_setopt($c, CURLOPT_URL, $url);   
@@ -96,8 +99,8 @@ class vk_wallpost
   {
     $u = urlencode($url);
     $i = urlencode($img);
-    $this->_curl_init($use_proxy, false, $cookies);
-    $q = 'act=a_photo&url='.$u.'&image='.$i.'extra=';
+    $c = $this->_curl_init($use_proxy, false, $cookies);
+    $q = 'act=a_photo&url='.$u.'&image='.$i.'&extra=';
     curl_setopt($c, CURLOPT_POST, 1);  
     curl_setopt($c, CURLOPT_REFERER, 'http://vkontakte.ru/share.php');
     curl_setopt($c, CURLOPT_POSTFIELDS, $q);
@@ -145,7 +148,7 @@ class vk_wallpost
     {
       $q = 'act=post&al=1&hash='.$hash.'&message='.$m.'&note_title=&official=&status_export=&to_id='.$id.'&type=all';
     }  
-    $this->_curl_init($use_proxy, false, $cookies);
+    $c = $this->_curl_init($use_proxy, false, $cookies);
     curl_setopt($c, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest')); 
     curl_setopt($c, CURLOPT_POST, 1);  
     curl_setopt($c, CURLOPT_REFERER, 'http://vkontakte.ru/'.$_prefix.$id);
