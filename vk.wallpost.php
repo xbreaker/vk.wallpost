@@ -100,7 +100,6 @@ class vk_wallpost
     //настройка прокси 
     if($this->useProxy)  
     {
-      $proxy = $this->_proxy();
       curl_setopt($c, CURLOPT_PROXY, $this->proxyAddr);
       curl_setopt($c, CURLOPT_PROXYUSERPWD, $this->proxyAuth);
       if( $this->proxyType == 'socks4' )
