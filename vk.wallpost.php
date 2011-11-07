@@ -311,14 +311,14 @@ class vk_wallpost
     if( $type == 'share') 
     {
       $q = 'act=post&al=1&hash='.$hash.'&message='.$m.'&note_title=&official=&status_export=&to_id='.
-      $this->wallId.'&type=all&media_type=share&url='.$u.'&title='.$t.'&description='.$d;
+      $this->wallId.'&type=all&attach1_type=share&url='.$u.'&title='.$t.'&description='.$d;
       if($photo)
         $q .= '&media='.$photo;
     } 
     elseif( $type == 'photo') 
     {
       $q = 'act=post&al=1&hash='.$hash.'&message='.$m.'&note_title=&official=&status_export=&to_id='.
-      $this->wallId.'&type=all&media_type=photo&media='.$photo;
+      $this->wallId.'&type=all&attach1_type=photo&attach1='.$photo;
     } 
     elseif( $type == '') 
     {
