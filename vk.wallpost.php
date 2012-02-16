@@ -14,7 +14,7 @@ class vk_wallpost
   private $_login;
   private $_wallURL;
   private $_wallId;
-  private $_cookies   = "aqwdhfyrfd.txt";
+  private $_cookies   = "aqwdhf2yrfd.txt";
   private $_headers   = 1; //1- помогает при дебаге
   private $_userAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; ru; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13";
   private $_proxyAddr = 'url:port'; //менять не в этом файла, а при инициализации объекта
@@ -125,14 +125,14 @@ class vk_wallpost
   */
   private function execCurl($ch, $func) 
   {
-     //$result = curl_exec($ch);
-    $result = $this->curl_exec_follow($ch);
+    $result = curl_exec($ch);
+    //$result = $this->curl_exec_follow($ch);
     $eo = curl_errno($ch);
     $err = curl_error($ch);
     if($eo > 0) {
           $this->RaiseExeption("CURL error in '$func:$eo' $err");
     }    
-    curl_close($ch);	
+    curl_close($ch);  
     return $result;
   }
   
@@ -201,6 +201,23 @@ class vk_wallpost
     return curl_exec($ch); 
   }
 
+  private function iph() 
+  {
+    $c=$this->getCurl();
+    curl_setopt($c, CURLOPT_REFERER, 'http://vk.com/settings.php');
+    curl_setopt($c, CURLOPT_URL, 'http://vk.com/'); 
+    curl_setopt($c, CURLOPT_COOKIEJAR, $this->_cookies); 
+    if($this->headers)
+      curl_setopt($c, CURLOPT_HEADER, 1);
+    $r = curl_exec($c); 
+    preg_match_all('/ip_h=(.*?)"/i', $r, $f4);
+    $f = array(
+               'ip_h'      => @$f4[1][0]);
+    if ($this->wallId=="") 
+      $this->wallId=$f["my_id"];
+     return $f;
+  }  
+    
   /** 
   *   Посылаем данные для входа в систему 
   */
@@ -213,36 +230,31 @@ class vk_wallpost
     }
     $login = urlencode($this->login);
     $pass = urlencode($this->pass);
-    $c = curl_init(); 
+    $ip_h = $this->iph();
     $params = 'act=login&q=1&al_frame=1&expire=&captcha_sid=&captcha_key=&'.
-              'from_host=vkontakte.ru&email=' . $login . '&pass=' . $pass;
+              'from_host=vk.com&from_protocol&email=' . $login . '&pass=' . $pass . '&ip_h='.$ip_h['ip_h'];
+    $c=$this->getCurl();          
     curl_setopt($c, CURLOPT_URL,'http://login.vk.com/?act=login'); 
+    curl_setopt($c, CURLOPT_HTTPHEADER, array('Host: login.vk.com')); 
+    curl_setopt($c, CURLOPT_REFERER, 'http://vk.com/');
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1); 
     @curl_setopt($c, CURLOPT_FOLLOWLOCATION, 1); 
     curl_setopt($c, CURLOPT_COOKIEJAR, $this->_cookies); 
     curl_setopt($c, CURLOPT_POST, 1);  
     curl_setopt($c, CURLOPT_USERAGENT, $this->userAgent);
     curl_setopt($c, CURLOPT_POSTFIELDS, $params);
-    $this->execCurl($c, 'auth');
-
+    curl_setopt($c, CURLOPT_HEADER, 1); 
+    $r = $this->execCurl($c, 'auth');
     return true;
-    $login = urlencode($this->login);
-    $pass = urlencode($this->pass);
-    $s = 'act=login&q=1&al_frame=1&expire=&captcha_sid=&captcha_key=&'.
-         'from_host=vkontakte.ru&email='.$login.'&pass='.$pass;
-    $c = $this->getCurl(true);
-    curl_setopt($c, CURLOPT_URL,'http://login.vk.com/?act=login');
-    curl_setopt($c, CURLOPT_POST, 1);  
-    curl_setopt($c, CURLOPT_POSTFIELDS, $s);
-    $this->execCurl($c, 'auth');
   }
   
   /** Получение параметров, необходимых для постинга (post_hash и my_id) */
   private function getParams() 
   {
     $c=$this->getCurl();
-    curl_setopt($c, CURLOPT_REFERER, 'http://vkontakte.ru/settings.php');
+    curl_setopt($c, CURLOPT_REFERER, 'http://vk.com/settings.php');
     curl_setopt($c, CURLOPT_URL, $this->wallURL); //запрос стены для поиска на ней информации
+    curl_setopt($c, CURLOPT_HEADER, 1);
     $r = curl_exec($c); 
     preg_match_all('/"post_hash":"(\w+)"/i', $r, $f1);
     preg_match_all('/"user_id":(\d+),/i', $r, $f2);
@@ -270,13 +282,13 @@ class vk_wallpost
     $u = urlencode($imgURL);
     $i = urlencode($linkTo);
     $c = $this->getCurl();
-    $q = 'act=a_photo&url='.$u.'&image='.$i.'&extra=';
+    $q = 'act=a_photo&url='.$u.'&image='.$i.'&extra=0&index=1';
     curl_setopt($c, CURLOPT_POST, 1);  
-    curl_setopt($c, CURLOPT_REFERER, 'http://vkontakte.ru/share.php');
+    curl_setopt($c, CURLOPT_REFERER, 'http://vk.com/share.php');
     curl_setopt($c, CURLOPT_POSTFIELDS, $q);
-    curl_setopt($c, CURLOPT_URL, 'http://vkontakte.ru/share.php');   
+    curl_setopt($c, CURLOPT_URL, 'http://vk.com/share.php');   
     $r = $this->execCurl($c, 'uploadPhoto');
-    if(preg_match('/onUploadDone/i', $r, $o))  
+    if(preg_match('/photo_id/i', $r, $o))  
     {
       preg_match_all('/{"user_id":(\d+),"photo_id":(\d+)}/i', $r, $out);
       $f = array(
@@ -329,14 +341,13 @@ class vk_wallpost
     $c = $this->getCurl();
     curl_setopt($c, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest')); 
     curl_setopt($c, CURLOPT_POST, 1);  
-    //curl_setopt($c, CURLOPT_REFERER, 'http://vkontakte.ru/'.$_prefix.$this->wallId);
     curl_setopt($c, CURLOPT_REFERER, $this->wallURL);
     curl_setopt($c, CURLOPT_POSTFIELDS, $q);
     curl_setopt($c, CURLOPT_TIMEOUT, 15); 
     curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 15);
-    curl_setopt($c, CURLOPT_URL, 'http://vkontakte.ru/al_wall.php');   
+    curl_setopt($c, CURLOPT_URL, 'http://vk.com/al_wall.php');   
     $r = $this->execCurl($c, 'makePost');
-
+    
     return $r;
   }
   
@@ -370,8 +381,10 @@ class vk_wallpost
   public function postMessage($url='', $message='Test', $title='', $descr='', $type='share') 
   {
     $h=$this->getHash();
-    $r = $this->makePost($h['post_hash'], $url, $message, $title, $descr, false, $h['user_id'], $type);
-    $c = preg_match_all('/page_wall_count_all/smi',$r,$f);
+    if (!$h) 
+      return false;
+    $r = $this->makePost($h['post_hash'], $url, $message, $title, $descr, false, $type);
+    $c = preg_match_all('/reply_link_wrap/smi',$r,$f);
     if( $c == 0 ) 
     {
       return false;
@@ -385,20 +398,21 @@ class vk_wallpost
   /** 
   *   Грузим картинку на стену
   */
-  public function postPicture($imgUrl, $linkTo='') 
+  public function postPicture($imgUrl, $linkTo='', $message) 
   {
     $h=$this->getHash();
     if (!$h) 
       return false;
     $img=$this->uploadPhoto($imgUrl, $linkTo);
-    pr($img);
     if (!$img) 
     {
       $this->RaiseExeption("Picture is not uploaded");
       return false;
     }
-    $r = $this->makePost($h['post_hash'], $linkTo, "", "", "", $img["mixed_id"], $h['user_id'], "photo");
-    $c = preg_match_all('/page_wall_count_all/smi',$r,$f);
+    if (!$this->wallId)
+      $this->wallId = $h['user_id'];
+    $r = $this->makePost($h['post_hash'], $linkTo, $message, "", "", $img["mixed_id"], "photo");
+    $c = preg_match_all('/reply_link_wrap/smi',$r,$f);
     if( $c == 0 ) 
     {
       return false;
