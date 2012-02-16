@@ -311,9 +311,10 @@ class vk_wallpost
     if( $type == 'share') 
     {
       $q = 'act=post&al=1&hash='.$hash.'&message='.$m.'&note_title=&official=&status_export=&to_id='.
-      $this->wallId.'&type=all&attach1_type=share&url='.$u.'&title='.$t.'&description='.$d;
+      $this->wallId.'&type=all&attach1_type=share&url='.$u.'&title='.$t.'&description='.$d.
+      '&extra=0&extra_data=&type=own&facebook_export=&friends_only=&signed=';
       if($photo)
-        $q .= '&media='.$photo;
+        $q .= '&attach1='.$photo;
     } 
     elseif( $type == 'photo') 
     {
